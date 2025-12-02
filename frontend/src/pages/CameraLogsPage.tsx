@@ -1,10 +1,17 @@
-import { useEffect, useState } from 'react'
-import { type CameraLog, getCameraLogs } from '../services/api'
+import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react'
+import { type CameraLog, getCameraLogs, uploadCameraLog } from '../services/api'
+
+// Helper to resolve image URL if relative
+const API_BASE_URL = "http://localhost:5185";
 
 export default function CameraLogsPage() {
     const [logs, setLogs] = useState<CameraLog[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Form state
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [submitting, setSubmitting] = useState(false)
 
     useEffect(() => {
         loadLogs()
@@ -22,8 +29,40 @@ export default function CameraLogsPage() {
         }
     }
 
-    if (loading) return <p style={{ color: '#718096', textAlign: 'center', marginTop: '2rem' }}>Loading logs...</p>
-    if (error) return <p style={{ color: "#e53e3e", background: '#fff5f5', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>{error}</p>
+    function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+        if (e.target.files && e.target.files.length > 0) {
+            setSelectedFile(e.target.files[0]);
+        }
+    }
+
+    async function handleSubmit(e: FormEvent) {
+        e.preventDefault()
+        if (!selectedFile) return
+
+        try {
+            setSubmitting(true)
+            setError(null)
+
+            const newLog = await uploadCameraLog(selectedFile)
+
+            setLogs(prev => [newLog, ...prev])
+            setSelectedFile(null)
+            // Reset file input
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+            if (fileInput) fileInput.value = "";
+
+        } catch (err: any) {
+            console.error(err)
+            setError(err.message ?? "Error uploading log")
+        } finally {
+            setSubmitting(false)
+        }
+    }
+
+    function getFullImageUrl(url: string) {
+        if (url.startsWith('http')) return url;
+        return `${API_BASE_URL}${url}`;
+    }
 
     return (
         <div style={{
@@ -35,8 +74,57 @@ export default function CameraLogsPage() {
         }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#2d3748', fontWeight: 700 }}>Camera Logs</h1>
-                <p style={{ margin: '0.5rem 0 0', color: '#718096', fontSize: '0.95rem' }}>View recent detections and model outputs</p>
+                <p style={{ margin: '0.5rem 0 0', color: '#718096', fontSize: '0.95rem' }}>Upload images to analyze with ML model</p>
             </div>
+
+            <form onSubmit={handleSubmit} style={{ marginBottom: "2rem", display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
+                        Upload Image
+                    </label>
+                    <input
+                        id="file-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        style={{
+                            padding: "0.5rem",
+                            width: "100%",
+                            borderRadius: '8px',
+                            border: '1px solid #bee3f8',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'border-color 0.2s',
+                            color: '#2d3748',
+                            backgroundColor: '#ebf8ff'
+                        }}
+                    />
+                </div>
+
+                <div style={{}}>
+                    <button
+                        type="submit"
+                        disabled={submitting || !selectedFile}
+                        style={{
+                            padding: "0.75rem 1.5rem",
+                            background: '#667eea',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            cursor: (submitting || !selectedFile) ? 'not-allowed' : 'pointer',
+                            transition: 'background 0.2s',
+                            height: '46px',
+                            opacity: (submitting || !selectedFile) ? 0.7 : 1
+                        }}
+                    >
+                        {submitting ? 'Uploading...' : 'Upload & Analyze'}
+                    </button>
+                </div>
+            </form>
+
+            {loading && <p style={{ color: '#718096', textAlign: 'center' }}>Loading logs...</p>}
+            {error && <p style={{ color: "#e53e3e", background: '#fff5f5', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>{error}</p>}
 
             <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0' }}>
@@ -54,7 +142,7 @@ export default function CameraLogsPage() {
                                 <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0', color: '#718096', fontFamily: 'monospace', fontSize: '0.85rem' }}>{log.id.substring(0, 8)}...</td>
                                 <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0' }}>
                                     <a
-                                        href={log.imageUrl}
+                                        href={getFullImageUrl(log.imageUrl)}
                                         target="_blank"
                                         rel="noreferrer"
                                         style={{ color: '#667eea', fontWeight: 500, textDecoration: 'none' }}

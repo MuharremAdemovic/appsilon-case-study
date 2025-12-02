@@ -51,6 +51,57 @@ public class CameraLogsController : ControllerBase
         public JsonElement ModelOutput { get; set; }
     }
 
+    [HttpPost("upload")]
+    public async Task<ActionResult<CameraLog>> Upload(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        // 1. Save file to wwwroot/uploads
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // 2. Generate Mock ML Output
+        var mockOutput = new
+        {
+            detected_objects = new[]
+            {
+                new { label = "person", confidence = 0.98, bbox = new[] { 100, 200, 50, 80 } },
+                new { label = "backpack", confidence = 0.85, bbox = new[] { 120, 220, 30, 40 } }
+            },
+            processing_time_ms = 125
+        };
+        var modelOutputJson = JsonSerializer.Serialize(mockOutput);
+
+        // 3. Create CameraLog
+        // Assuming the server URL is accessible via relative path or we construct full URL
+        // For simplicity, we'll store the relative path or full URL if we knew the host.
+        // Let's store relative path "/uploads/..." and let frontend handle base URL or just use relative.
+        var imageUrl = $"/uploads/{uniqueFileName}";
+
+        var log = new CameraLog
+        {
+            Id = Guid.NewGuid(),
+            ImageUrl = imageUrl,
+            ModelOutputJson = modelOutputJson,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.CameraLogs.Add(log);
+        await _db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = log.Id }, log);
+    }
+
     [HttpPost]
     public async Task<ActionResult<CameraLog>> Create([FromBody] CreateCameraLogRequest request)
     {

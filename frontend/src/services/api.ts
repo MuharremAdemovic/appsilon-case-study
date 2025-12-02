@@ -98,6 +98,33 @@ export async function getCameraLogs(): Promise<CameraLog[]> {
     return res.json()
 }
 
+export async function createCameraLog(data: { imageUrl: string; modelOutput: any }): Promise<CameraLog> {
+    const res = await fetch(`${API_BASE_URL}/api/CameraLogs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+        throw new Error('Failed to create camera log')
+    }
+    return res.json()
+}
+
+export async function uploadCameraLog(file: File): Promise<CameraLog> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE_URL}/api/CameraLogs/upload`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to upload camera log');
+    }
+    return res.json();
+}
+
 export type Employee = {
     id: string;
     name: string;
