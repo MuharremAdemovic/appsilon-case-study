@@ -1,5 +1,6 @@
 using Appsilon.Api.Data;
 using Appsilon.Api.Models;
+using Appsilon.Api.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
@@ -10,14 +11,6 @@ namespace Appsilon.Api.Controllers;
 [Route("api/[controller]")]
 public class EmployeesController : ControllerBase
 {
-
-    public class RegisterRequest
-    {
-        public string Name { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Department { get; set; } = null!; // IT / HR / Finance vs.
-        public string Password { get; set; } = null!;
-    }
     private readonly AppDbContext _context;
 
     public EmployeesController(AppDbContext context)
