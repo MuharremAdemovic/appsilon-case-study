@@ -26,5 +26,28 @@ services:
     depends_on:
       - postgres
 
+  backend:
+    container_name: appsilon-backend
+    build:
+      context: ./backend/Appsilon.Api
+      dockerfile: Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=appsilon_db;Username=postgres;Password=postgres
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5185:8080"
+    depends_on:
+      - postgres
+
+  frontend:
+    container_name: appsilon-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
 volumes:
   pgdata:

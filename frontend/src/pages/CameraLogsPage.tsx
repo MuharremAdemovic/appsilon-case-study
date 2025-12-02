@@ -1,0 +1,91 @@
+import { useEffect, useState } from 'react'
+import { type CameraLog, getCameraLogs } from '../services/api'
+
+export default function CameraLogsPage() {
+    const [logs, setLogs] = useState<CameraLog[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        loadLogs()
+    }, [])
+
+    async function loadLogs() {
+        try {
+            setLoading(true)
+            const data = await getCameraLogs()
+            setLogs(data)
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    if (loading) return <p style={{ color: '#718096', textAlign: 'center', marginTop: '2rem' }}>Loading logs...</p>
+    if (error) return <p style={{ color: "#e53e3e", background: '#fff5f5', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>{error}</p>
+
+    return (
+        <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            padding: '2rem',
+            border: '1px solid #e2e8f0'
+        }}>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#2d3748', fontWeight: 700 }}>Camera Logs</h1>
+                <p style={{ margin: '0.5rem 0 0', color: '#718096', fontSize: '0.95rem' }}>View recent detections and model outputs</p>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0' }}>
+                    <thead>
+                        <tr style={{ background: '#f7fafc' }}>
+                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', borderTopLeftRadius: '8px' }}>ID</th>
+                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0' }}>Image</th>
+                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0' }}>Model Output</th>
+                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', borderTopRightRadius: '8px' }}>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {logs.map((log, index) => (
+                            <tr key={log.id} style={{ transition: 'background 0.1s' }}>
+                                <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0', color: '#718096', fontFamily: 'monospace', fontSize: '0.85rem' }}>{log.id.substring(0, 8)}...</td>
+                                <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0' }}>
+                                    <a
+                                        href={log.imageUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{ color: '#667eea', fontWeight: 500, textDecoration: 'none' }}
+                                    >
+                                        View Image
+                                    </a>
+                                </td>
+                                <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0' }}>
+                                    <code style={{
+                                        background: '#edf2f7',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.8rem',
+                                        color: '#2d3748',
+                                        display: 'block',
+                                        maxWidth: '300px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        {log.modelOutputJson}
+                                    </code>
+                                </td>
+                                <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0', color: '#718096', fontSize: '0.9rem' }}>
+                                    {new Date(log.createdAt).toLocaleDateString()} <span style={{ color: '#cbd5e0' }}>•</span> {new Date(log.createdAt).toLocaleTimeString()}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+}

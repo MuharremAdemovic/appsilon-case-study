@@ -1,32 +1,54 @@
-// src/services/api.ts
+const API_BASE_URL = "http://localhost:5185";
 
-// 1) Employee tipini burada tanımlıyoruz ve EXPORT ediyoruz
-export interface Employee {
-    id: string
-    name: string
-    department: string
-    createdAt: string
+// 3) Login ol
+export interface LoginRequest {
+    email: string
+    password: string // Backend'de password kontrolü basitçe string karşılaştırma ise
 }
 
-// 2) Backend base URL (portu kendi backend’ine göre ayarla)
-const API_BASE_URL = 'http://localhost:5185' // dotnet run çıktısındaki HTTP port
+export interface LoginResponse {
+    id: string
+    name: string
+    email: string
+    department: string
+}
 
-// 3) Tüm çalışanları çek
-export async function getEmployees(): Promise<Employee[]> {
-    const res = await fetch(`${API_BASE_URL}/employees`)
+export async function login(data: LoginRequest): Promise<LoginResponse> {
+    const res = await fetch(`${API_BASE_URL}/api/Auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+        throw new Error('Login failed')
+    }
+    return res.json()
+}
+
+// 4) Tüm çalışanları çek (X-Employee-Id header ile)
+export async function getEmployees(currentEmployeeId: string): Promise<Employee[]> {
+    const res = await fetch(`${API_BASE_URL}/api/Employees`, {
+        headers: {
+            'X-Employee-Id': currentEmployeeId
+        }
+    })
     if (!res.ok) {
         throw new Error('Failed to fetch employees')
     }
     return res.json()
 }
 
-// 4) Yeni çalışan ekle
+// 5) Yeni çalışan ekle
 export async function createEmployee(
-    data: Omit<Employee, 'id' | 'createdAt'>
+    data: Omit<Employee, 'id' | 'createdAt'> & { password: string },
+    currentDepartment: string
 ): Promise<Employee> {
-    const res = await fetch(`${API_BASE_URL}/employees`, {
+    const res = await fetch(`${API_BASE_URL}/api/Employees`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Department': currentDepartment
+        },
         body: JSON.stringify(data),
     })
     if (!res.ok) {
@@ -34,3 +56,26 @@ export async function createEmployee(
     }
     return res.json()
 }
+
+// 6) Camera Logs
+export interface CameraLog {
+    id: string
+    imageUrl: string
+    modelOutputJson: string
+    createdAt: string
+}
+
+export async function getCameraLogs(): Promise<CameraLog[]> {
+    const res = await fetch(`${API_BASE_URL}/api/CameraLogs`)
+    if (!res.ok) {
+        throw new Error('Failed to fetch camera logs')
+    }
+    return res.json()
+}
+
+export type Employee = {
+    id: string;
+    name: string;
+    department: string;
+    createdAt: string;
+};
