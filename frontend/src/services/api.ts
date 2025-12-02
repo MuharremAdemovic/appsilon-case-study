@@ -125,6 +125,16 @@ export async function uploadCameraLog(file: File): Promise<CameraLog> {
     return res.json();
 }
 
+export async function deleteCameraLog(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/CameraLogs/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to delete camera log');
+    }
+}
+
 export type Employee = {
     id: string;
     name: string;

@@ -121,4 +121,18 @@ public class CameraLogsController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = log.Id }, log);
     }
+
+    // DELETE: api/cameralogs/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var log = await _db.CameraLogs.FindAsync(id);
+        if (log == null)
+            return NotFound();
+
+        _db.CameraLogs.Remove(log);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

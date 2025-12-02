@@ -37,6 +37,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5185:8080"
+    volumes:
+      - ./backend/Appsilon.Api/wwwroot/uploads:/app/wwwroot/uploads
     depends_on:
       - postgres
 

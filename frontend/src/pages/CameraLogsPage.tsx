@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react'
-import { type CameraLog, getCameraLogs, uploadCameraLog } from '../services/api'
+import { type CameraLog, getCameraLogs, uploadCameraLog, deleteCameraLog } from '../services/api'
 
 // Helper to resolve image URL if relative
 const API_BASE_URL = "http://localhost:5185";
@@ -56,6 +56,18 @@ export default function CameraLogsPage() {
             setError(err.message ?? "Error uploading log")
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    async function handleDelete(id: string) {
+        if (!confirm("Are you sure you want to delete this log?")) return;
+
+        try {
+            await deleteCameraLog(id);
+            setLogs(prev => prev.filter(l => l.id !== id));
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message ?? "Error deleting log");
         }
     }
 
@@ -169,7 +181,8 @@ export default function CameraLogsPage() {
                             <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', borderTopLeftRadius: '8px' }}>ID</th>
                             <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0' }}>Image</th>
                             <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0' }}>Model Output</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', borderTopRightRadius: '8px' }}>Created At</th>
+                            <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0' }}>Created At</th>
+                            <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, color: '#4a5568', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', borderTopRightRadius: '8px' }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -204,6 +217,26 @@ export default function CameraLogsPage() {
                                 </td>
                                 <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0', color: '#718096', fontSize: '0.9rem' }}>
                                     {new Date(log.createdAt).toLocaleDateString()} <span style={{ color: '#cbd5e0' }}>•</span> {new Date(log.createdAt).toLocaleTimeString()}
+                                </td>
+                                <td style={{ padding: '1rem', borderBottom: index === logs.length - 1 ? 'none' : '1px solid #e2e8f0', textAlign: 'right' }}>
+                                    <button
+                                        onClick={() => handleDelete(log.id)}
+                                        style={{
+                                            background: '#fff5f5',
+                                            color: '#e53e3e',
+                                            border: '1px solid #fed7d7',
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 600,
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = '#fed7d7'}
+                                        onMouseLeave={e => e.currentTarget.style.background = '#fff5f5'}
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}
