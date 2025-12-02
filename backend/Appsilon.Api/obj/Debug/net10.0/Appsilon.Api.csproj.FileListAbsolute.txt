@@ -181,3 +181,13 @@
 /Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/obj/Debug/net10.0/Appsilon.Api.pdb
 /Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/obj/Debug/net10.0/Appsilon.Api.genruntimeconfig.cache
 /Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/obj/Debug/net10.0/ref/Appsilon.Api.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/BCrypt.Net-Next.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Logging.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Tokens.dll
+/Users/muharrem/Projects/appsilon-case-study/backend/Appsilon.Api/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll

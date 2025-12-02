@@ -18,12 +18,18 @@ public class EmployeesController : ControllerBase
 
     // GET: api/Employees
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+    public async Task<IActionResult> GetEmployees()
     {
-        return await _context.Employees
-            .OrderBy(e => e.CreatedAt)
-            .ToListAsync();
+        if (!Request.Headers.TryGetValue("X-Department", out var userDept))
+            return BadRequest("Department header missing");
+
+        var employees = await _context.Employees
+        .Where(e => e.Department == userDept)
+        .ToListAsync();
+
+        return Ok(employees);
     }
+
 
     // GET: api/Employees/5
     [HttpGet("{id:guid}")]
@@ -41,18 +47,21 @@ public class EmployeesController : ControllerBase
 
     // POST: api/Employees
     [HttpPost]
-    public async Task<ActionResult<Employee>> CreateEmployee([FromBody] Employee employee)
+    public async Task<IActionResult> CreateEmployee(Employee employee)
     {
-        // Id ve CreatedAt backend tarafında set edilsin
-        employee.Id = Guid.NewGuid();
-        employee.CreatedAt = DateTime.UtcNow;
+        if (!Request.Headers.TryGetValue("X-Department", out var userDept))
+            return BadRequest("Department header missing");
+
+        // Yeni eklenen çalışan, kullanıcının kendi birimi olmalı
+        employee.Department = userDept;
 
         _context.Employees.Add(employee);
         await _context.SaveChangesAsync();
 
-        // 201 Created + Location header
-        return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, employee);
+        return Ok(employee);
     }
+
+
 
     // PUT: api/Employees/5
     [HttpPut("{id:guid}")]
@@ -93,4 +102,46 @@ public class EmployeesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("register")]
+public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.Name) ||
+        string.IsNullOrWhiteSpace(request.Password) ||
+        string.IsNullOrWhiteSpace(request.Department))
+    {
+        return BadRequest("Name, Department and Password are required.");
+    }
+
+    // Aynı isimde user var mı? (Örnek amaçlı, normalde email vs. kullanılır)
+    var existing = await _context.Employees
+        .FirstOrDefaultAsync(x => x.Name == request.Name);
+
+    if (existing != null)
+        return Conflict("User already exists.");
+
+    // Şifre hashle
+    string hashed = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+    // Yeni employee oluştur
+    var emp = new Employee
+    {
+        Id = Guid.NewGuid(),
+        Name = request.Name,
+        Department = request.Department, // IT - HR - Finance vs
+        PasswordHash = hashed,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    _context.Employees.Add(emp);
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        emp.Id,
+        emp.Name,
+        emp.Department
+    });
+}
+
 }
