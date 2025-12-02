@@ -2,7 +2,6 @@ using Appsilon.Api.Data;
 using Appsilon.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net; // BCrypt.Net-Next paketi
 
 namespace Appsilon.Api.Controllers;
 
@@ -21,26 +20,24 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // 1) Email’e göre employee bul
+        // 1) Email'e göre kullanıcıyı bul
         var employee = await _context.Employees
             .FirstOrDefaultAsync(e => e.Email == request.Email);
 
         if (employee == null)
             return Unauthorized("Invalid email or password");
 
-        // 2) Password’u hash ile verify et
-        var isValid = BCrypt.Net.BCrypt.Verify(request.Password, employee.PasswordHash);
-        if (!isValid)
+        // 2) Şifreyi verify et
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, employee.PasswordHash))
             return Unauthorized("Invalid email or password");
 
-        // 3) Başarılıysa employee bilgilerini dön
+        // 3) Basit login cevabı (şimdilik JWT üretmiyoruz)
         return Ok(new
         {
             employee.Id,
             employee.Name,
             employee.Email,
             employee.Department
-            // istersen token vs. de ekleyebilirsin, ama case için şart değil
         });
     }
 }

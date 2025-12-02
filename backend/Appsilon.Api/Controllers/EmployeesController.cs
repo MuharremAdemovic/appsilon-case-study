@@ -2,6 +2,7 @@ using Appsilon.Api.Data;
 using Appsilon.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace Appsilon.Api.Controllers;
 
@@ -9,6 +10,14 @@ namespace Appsilon.Api.Controllers;
 [Route("api/[controller]")]
 public class EmployeesController : ControllerBase
 {
+
+    public class RegisterRequest
+    {
+        public string Name { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string Department { get; set; } = null!; // IT / HR / Finance vs.
+        public string Password { get; set; } = null!;
+    }
     private readonly AppDbContext _context;
 
     public EmployeesController(AppDbContext context)
@@ -45,22 +54,28 @@ public class EmployeesController : ControllerBase
         return employee;
     }
 
-    // POST: api/Employees
     [HttpPost]
-    public async Task<IActionResult> CreateEmployee(Employee employee)
+    public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequest request)
     {
         if (!Request.Headers.TryGetValue("X-Department", out var userDept))
             return BadRequest("Department header missing");
 
-        // Yeni eklenen çalışan, kullanıcının kendi birimi olmalı
-        employee.Department = userDept;
+        var hashed = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        _context.Employees.Add(employee);
+        var emp = new Employee
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Department = userDept!,
+            PasswordHash = hashed,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Employees.Add(emp);
         await _context.SaveChangesAsync();
 
-        return Ok(employee);
+        return Ok(emp);
     }
-
 
 
     // PUT: api/Employees/5
@@ -104,44 +119,46 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost("register")]
-public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-{
-    if (string.IsNullOrWhiteSpace(request.Name) ||
-        string.IsNullOrWhiteSpace(request.Password) ||
-        string.IsNullOrWhiteSpace(request.Department))
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        return BadRequest("Name, Department and Password are required.");
+        if (string.IsNullOrWhiteSpace(request.Name) ||
+            string.IsNullOrWhiteSpace(request.Password) ||
+            string.IsNullOrWhiteSpace(request.Department))
+        {
+            return BadRequest("Name, Department and Password are required.");
+        }
+
+        // Aynı isimde user var mı? (Örnek amaçlı, normalde email vs. kullanılır)
+        var existing = await _context.Employees
+            .FirstOrDefaultAsync(x => x.Name == request.Name);
+
+        if (existing != null)
+            return Conflict("User already exists.");
+
+        // Şifre hashle
+        string hashed = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+        // Yeni employee oluştur
+        var emp = new Employee
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Email = request.Email,                 // <-- BUNU EKLE
+            Department = request.Department,
+            PasswordHash = hashed,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Employees.Add(emp);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            emp.Id,
+            emp.Name,
+            emp.Department
+        });
     }
-
-    // Aynı isimde user var mı? (Örnek amaçlı, normalde email vs. kullanılır)
-    var existing = await _context.Employees
-        .FirstOrDefaultAsync(x => x.Name == request.Name);
-
-    if (existing != null)
-        return Conflict("User already exists.");
-
-    // Şifre hashle
-    string hashed = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-    // Yeni employee oluştur
-    var emp = new Employee
-    {
-        Id = Guid.NewGuid(),
-        Name = request.Name,
-        Department = request.Department, // IT - HR - Finance vs
-        PasswordHash = hashed,
-        CreatedAt = DateTime.UtcNow
-    };
-
-    _context.Employees.Add(emp);
-    await _context.SaveChangesAsync();
-
-    return Ok(new
-    {
-        emp.Id,
-        emp.Name,
-        emp.Department
-    });
 }
 
-}
+
