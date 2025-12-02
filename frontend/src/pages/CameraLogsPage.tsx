@@ -82,23 +82,59 @@ export default function CameraLogsPage() {
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
                         Upload Image
                     </label>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        style={{
-                            padding: "0.5rem",
-                            width: "100%",
-                            borderRadius: '8px',
-                            border: '1px solid #bee3f8',
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                            color: '#2d3748',
-                            backgroundColor: '#ebf8ff'
-                        }}
-                    />
+                    <div style={{ position: 'relative', width: '100%', height: '100px' }}>
+                        <input
+                            id="file-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                opacity: 0,
+                                cursor: 'pointer',
+                                zIndex: 2
+                            }}
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                border: '2px dashed #cbd5e0',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: '#f7fafc',
+                                transition: 'all 0.2s',
+                                color: '#718096',
+                                zIndex: 1
+                            }}
+                            className="upload-box"
+                        >
+                            {selectedFile ? (
+                                <span style={{ fontWeight: 500, color: '#48bb78' }}>{selectedFile.name}</span>
+                            ) : (
+                                <>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        style={{ width: '32px', height: '32px', marginBottom: '0.5rem' }}
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span className="upload-text" style={{ fontSize: '0.85rem', fontWeight: 600 }}>UPLOAD</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 <div style={{}}>

@@ -1,4 +1,5 @@
 import { type FC } from 'react'
+import { Link } from 'react-router-dom'
 
 interface NavbarProps {
     currentView: 'employees' | 'cameraLogs'
@@ -8,7 +9,7 @@ interface NavbarProps {
     userDepartment: string
 }
 
-const Navbar: FC<NavbarProps> = ({ currentView, onViewChange, onLogout, userName, userDepartment }) => {
+const Navbar: FC<NavbarProps> = ({ currentView, onLogout, userName, userDepartment }) => {
     return (
         <nav style={{
             display: 'flex',
@@ -33,13 +34,13 @@ const Navbar: FC<NavbarProps> = ({ currentView, onViewChange, onLogout, userName
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <NavButton
                         active={currentView === 'employees'}
-                        onClick={() => onViewChange('employees')}
+                        to="/employees"
                     >
                         Employees
                     </NavButton>
                     <NavButton
                         active={currentView === 'cameraLogs'}
-                        onClick={() => onViewChange('cameraLogs')}
+                        to="/camera-logs"
                     >
                         Camera Logs
                     </NavButton>
@@ -73,9 +74,9 @@ const Navbar: FC<NavbarProps> = ({ currentView, onViewChange, onLogout, userName
     )
 }
 
-const NavButton: FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
-    <button
-        onClick={onClick}
+const NavButton: FC<{ active: boolean; to: string; children: React.ReactNode }> = ({ active, to, children }) => (
+    <Link
+        to={to}
         style={{
             background: active ? '#ebf4ff' : 'transparent',
             border: 'none',
@@ -85,11 +86,13 @@ const NavButton: FC<{ active: boolean; onClick: () => void; children: React.Reac
             fontSize: '0.95rem',
             padding: '0.5rem 1rem',
             borderRadius: '8px',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            textDecoration: 'none',
+            display: 'inline-block'
         }}
     >
         {children}
-    </button>
+    </Link>
 )
 
 export default Navbar

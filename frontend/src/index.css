@@ -11,6 +11,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.upload-box:hover {
+  border-color: #667eea !important;
+  background-color: #ebf8ff !important;
+  color: #5a67d8 !important;
+}
+
+.upload-box:hover svg {
+  stroke: #5a67d8;
+}
+
 body {
   margin: 0;
   min-width: 320px;
