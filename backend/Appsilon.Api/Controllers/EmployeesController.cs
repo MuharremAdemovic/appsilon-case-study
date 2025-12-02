@@ -25,20 +25,25 @@ public class EmployeesController : ControllerBase
         _context = context;
     }
 
-    // GET: api/Employees
+  // GET api/employees
     [HttpGet]
     public async Task<IActionResult> GetEmployees()
     {
-        if (!Request.Headers.TryGetValue("X-Department", out var userDept))
-            return BadRequest("Department header missing");
+        if (!Request.Headers.TryGetValue("X-Employee-Id", out var employeeId))
+            return BadRequest("Missing X-Employee-Id header");
+
+        Guid id = Guid.Parse(employeeId!);
+
+        var currentUser = await _context.Employees.FindAsync(id);
+        if (currentUser == null)
+            return Unauthorized("Invalid user");
 
         var employees = await _context.Employees
-        .Where(e => e.Department == userDept)
-        .ToListAsync();
+            .Where(e => e.Department == currentUser.Department)
+            .ToListAsync();
 
         return Ok(employees);
     }
-
 
     // GET: api/Employees/5
     [HttpGet("{id:guid}")]

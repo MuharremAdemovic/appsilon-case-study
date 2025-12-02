@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Appsilon.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f89aa6de3e240b6ee763dbfa8e8bf1fc8ff04e0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e60ff68cbeb868493952c56e7c84a1fa09e67bc0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Appsilon.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Appsilon.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
