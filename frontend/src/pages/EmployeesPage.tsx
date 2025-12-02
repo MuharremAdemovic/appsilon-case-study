@@ -9,10 +9,11 @@ interface EmployeesPageProps {
 export default function EmployeesPage({ currentUser }: EmployeesPageProps) {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const [name, setName] = useState("");
-    const [department, setDepartment] = useState("IT");
+    const [department, setDepartment] = useState(currentUser.department);
     const [password, setPassword] = useState("");
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -36,77 +37,94 @@ export default function EmployeesPage({ currentUser }: EmployeesPageProps) {
         }
     }
 
-    async function handleSubmit(e: FormEvent) {
-        e.preventDefault();
-        if (!name.trim() || !department.trim()) return;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editName, setEditName] = useState("");
+    const [editDepartment, setEditDepartment] = useState("");
 
-        // Password check only for new employees
-        if (!editingId && !password.trim()) return;
+    // ... existing loadEmployees ...
+
+    async function handleCreate(e: FormEvent) {
+        e.preventDefault();
+        if (!name.trim()) { setError("Name is required"); return; }
+        if (!department.trim()) { setError("Department is required"); return; }
+        if (!password.trim()) { setError("Password is required"); return; }
 
         try {
+            setSubmitting(true);
             setError(null);
 
-            // Format name: extract before @ (if user typed it) and keep only letters and numbers
-            // If user just typed "John", split is ["John"].
             let rawName = name.split('@')[0];
             let formattedName = rawName.replace(/[^a-zA-Z0-9]/g, '');
+            if (!formattedName) { setError("Invalid name format"); setSubmitting(false); return; }
 
-            // Auto-generate email
             const generatedEmail = `${formattedName}@example.com`;
 
-            if (editingId) {
-                // Update existing employee
-                // We need to pass the full object including ID for the backend check
-                const employeeToUpdate = employees.find(e => e.id === editingId);
-                if (!employeeToUpdate) return;
+            const created = await createEmployee({ name: formattedName, email: generatedEmail, department, password }, currentUser.department);
 
-                const updatedData = {
-                    ...employeeToUpdate,
-                    name: formattedName,
-                    email: generatedEmail, // Update email as well
-                    department
-                };
-
-                await updateEmployee(editingId, updatedData);
-
-                setEmployees(prev => prev.map(emp => emp.id === editingId ? { ...emp, name: formattedName, email: generatedEmail, department } : emp));
-                setEditingId(null);
-            } else {
-                // Create new employee
-                // name: formattedName (e.g. "JohnDoe")
-                // email: generatedEmail (e.g. "JohnDoe@example.com")
-                const created = await createEmployee({ name: formattedName, email: generatedEmail, department, password }, currentUser.department);
-
-                // Sadece eğer eklenen kişi benim departmanımdaysa listeye ekle
-                if (created.department === currentUser.department) {
-                    setEmployees((prev) => [...prev, created]);
-                }
+            if (created.department === currentUser.department) {
+                setEmployees((prev) => [...prev, created]);
             }
 
             setName("");
-            setDepartment("IT");
             setPassword("");
         } catch (err: any) {
             console.error(err);
-            if (err.message.includes("zaten var")) {
-                alert(err.message); // Show the specific backend message
-            }
+            if (err.message.includes("zaten var")) alert(err.message);
             setError(err.message ?? "Error while creating employee");
+        } finally {
+            setSubmitting(false);
         }
     }
 
-    function startEdit(employee: Employee) {
-        setEditingId(employee.id);
-        setName(employee.name); // Or email if we had it stored separately, but name is formatted
-        setDepartment(employee.department);
-        setPassword(""); // Password usually not editable this way or kept empty
+    async function handleUpdate(e: FormEvent) {
+        e.preventDefault();
+        if (!editingId) return;
+
+        try {
+            setSubmitting(true);
+            setError(null);
+
+            let rawName = editName.split('@')[0];
+            let formattedName = rawName.replace(/[^a-zA-Z0-9]/g, '');
+            if (!formattedName) { setError("Invalid name format"); setSubmitting(false); return; }
+
+            const generatedEmail = `${formattedName}@example.com`;
+            const employeeToUpdate = employees.find(e => e.id === editingId);
+            if (!employeeToUpdate) return;
+
+            const updatedData = {
+                ...employeeToUpdate,
+                name: formattedName,
+                email: generatedEmail,
+                department: editDepartment
+            };
+
+            await updateEmployee(editingId, updatedData);
+
+            setEmployees(prev => prev.map(emp => emp.id === editingId ? { ...emp, name: formattedName, email: generatedEmail, department: editDepartment } : emp));
+            closeModal();
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message ?? "Error while updating employee");
+        } finally {
+            setSubmitting(false);
+        }
     }
 
-    function cancelEdit() {
+    function openEditModal(employee: Employee) {
+        setEditingId(employee.id);
+        setEditName(employee.name);
+        setEditDepartment(employee.department);
+        setIsModalOpen(true);
+        setError(null);
+    }
+
+    function closeModal() {
+        setIsModalOpen(false);
         setEditingId(null);
-        setName("");
-        setDepartment("IT");
-        setPassword("");
+        setEditName("");
+        setEditDepartment("");
+        setError(null);
     }
 
     async function handleDelete(id: string) {
@@ -127,122 +145,107 @@ export default function EmployeesPage({ currentUser }: EmployeesPageProps) {
             borderRadius: '16px',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
             padding: '2rem',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #e2e8f0',
+            position: 'relative'
         }}>
+            {/* Modal Overlay */}
+            {isModalOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '2rem',
+                        borderRadius: '12px',
+                        width: '400px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                    }}>
+                        <h2 style={{ marginTop: 0, color: '#2d3748' }}>Update Employee</h2>
+                        <form onSubmit={handleUpdate}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4a5568' }}>Name</label>
+                                <input
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e0' }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4a5568' }}>Department</label>
+                                <select
+                                    value={editDepartment}
+                                    onChange={(e) => setEditDepartment(e.target.value)}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e0' }}
+                                >
+                                    <option value="IT">IT</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Finance">Finance</option>
+                                </select>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                <button type="button" onClick={closeModal} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e0', background: 'white', cursor: 'pointer' }}>Cancel</button>
+                                <button type="submit" disabled={submitting} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: '#667eea', color: 'white', cursor: 'pointer' }}>
+                                    {submitting ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#2d3748', fontWeight: 700 }}>Employees</h1>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ marginBottom: "2rem", display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+            {/* Create Form */}
+            <form onSubmit={handleCreate} style={{ marginBottom: "2rem", display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
-                        Name
-                    </label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>Name</label>
                     <input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        style={{
-                            padding: "0.75rem",
-                            width: "100%",
-                            borderRadius: '8px',
-                            border: '1px solid #bee3f8',
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                            color: '#2d3748',
-                            backgroundColor: '#ebf8ff'
-                        }}
+                        style={{ padding: "0.75rem", width: "100%", borderRadius: '8px', border: '1px solid #bee3f8', fontSize: '0.95rem', outline: 'none', color: '#2d3748', backgroundColor: '#ebf8ff' }}
                         placeholder="Enter name"
                     />
                 </div>
-
                 <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
-                        Department
-                    </label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>Department</label>
                     <select
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
-                        style={{
-                            padding: "0.75rem",
-                            width: "100%",
-                            borderRadius: '8px',
-                            border: '1px solid #bee3f8',
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                            background: '#ebf8ff', // Baby blue
-                            cursor: 'pointer',
-                            color: '#2d3748'
-                        }}
+                        style={{ padding: "0.75rem", width: "100%", borderRadius: '8px', border: '1px solid #bee3f8', fontSize: '0.95rem', outline: 'none', background: '#ebf8ff', cursor: 'pointer', color: '#2d3748' }}
                     >
                         <option value="IT">IT</option>
                         <option value="HR">HR</option>
                         <option value="Finance">Finance</option>
                     </select>
                 </div>
-
                 <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
-                        Password
-                    </label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>Password</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        style={{
-                            padding: "0.75rem",
-                            width: "100%",
-                            borderRadius: '8px',
-                            border: '1px solid #bee3f8', // Lighter blue border
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            transition: 'border-color 0.2s',
-                            color: '#2d3748',
-                            backgroundColor: '#ebf8ff' // Baby blue background
-                        }}
-                        placeholder={editingId ? "Unchanged" : "••••••••"}
-                        disabled={!!editingId}
+                        style={{ padding: "0.75rem", width: "100%", borderRadius: '8px', border: '1px solid #bee3f8', fontSize: '0.95rem', outline: 'none', color: '#2d3748', backgroundColor: '#ebf8ff' }}
+                        placeholder="••••••••"
                     />
                 </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {editingId && (
-                        <button
-                            type="button"
-                            onClick={cancelEdit}
-                            style={{
-                                padding: "0.75rem 1.5rem",
-                                background: '#e2e8f0',
-                                color: '#4a5568',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'background 0.2s',
-                                height: '46px'
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    )}
-                    <button
-                        type="submit"
-                        style={{
-                            padding: "0.75rem 1.5rem",
-                            background: editingId ? '#ed8936' : '#667eea',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'background 0.2s',
-                            height: '46px'
-                        }}
-                    >
-                        {editingId ? 'Update Employee' : 'Add Employee'}
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    disabled={submitting}
+                    style={{ padding: "0.75rem 1.5rem", background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: submitting ? 'not-allowed' : 'pointer', transition: 'background 0.2s', height: '46px', opacity: submitting ? 0.7 : 1 }}
+                >
+                    {submitting ? 'Adding...' : 'Add Employee'}
+                </button>
             </form>
 
             {loading && <p style={{ color: '#718096' }}>Loading employees...</p>}
@@ -269,47 +272,17 @@ export default function EmployeesPage({ currentUser }: EmployeesPageProps) {
                                 </td>
                                 <td style={{ padding: '1rem', borderBottom: index === employees.length - 1 ? 'none' : '1px solid #e2e8f0', color: '#718096', fontSize: '0.9rem' }}>
                                     {new Date(emp.createdAt).toLocaleDateString()}
-                                    {emp.updatedAt && (
-                                        <div style={{ fontSize: '0.75rem', color: '#a0aec0', marginTop: '0.25rem' }}>
-                                            Updated: {new Date(emp.updatedAt).toLocaleDateString()}
-                                        </div>
-                                    )}
                                 </td>
                                 <td style={{ padding: '1rem', borderBottom: index === employees.length - 1 ? 'none' : '1px solid #e2e8f0', textAlign: 'right' }}>
                                     <button
-                                        onClick={() => startEdit(emp)}
-                                        style={{
-                                            background: '#fffaf0',
-                                            color: '#dd6b20',
-                                            border: '1px solid #fbd38d',
-                                            padding: '0.5rem 1rem',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.85rem',
-                                            fontWeight: 600,
-                                            transition: 'all 0.2s',
-                                            marginRight: '0.5rem'
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.background = '#fbd38d'}
-                                        onMouseLeave={e => e.currentTarget.style.background = '#fffaf0'}
+                                        onClick={() => openEditModal(emp)}
+                                        style={{ background: '#fffaf0', color: '#dd6b20', border: '1px solid #fbd38d', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s', marginRight: '0.5rem' }}
                                     >
                                         Update
                                     </button>
                                     <button
                                         onClick={() => handleDelete(emp.id)}
-                                        style={{
-                                            background: '#fff5f5',
-                                            color: '#e53e3e',
-                                            border: '1px solid #fed7d7',
-                                            padding: '0.5rem 1rem',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.85rem',
-                                            fontWeight: 600,
-                                            transition: 'all 0.2s'
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.background = '#fed7d7'}
-                                        onMouseLeave={e => e.currentTarget.style.background = '#fff5f5'}
+                                        style={{ background: '#fff5f5', color: '#e53e3e', border: '1px solid #fed7d7', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}
                                     >
                                         Delete
                                     </button>
