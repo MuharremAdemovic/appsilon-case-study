@@ -8,4 +8,5 @@ public class Employee
     public string Department { get; set; } = null!;
     public string PasswordHash { get; set; } = null!; // Şifre burada tutuluyor
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }

@@ -34,6 +34,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=appsilon_db;Username=postgres;Password=postgres
       - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5185:8080"
     depends_on:

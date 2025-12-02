@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import EmployeesPage from './pages/EmployeesPage'
 import CameraLogsPage from './pages/CameraLogsPage'
 import LoginPage from './pages/LoginPage'
@@ -6,8 +6,19 @@ import Navbar from './components/Navbar'
 import type { LoginResponse } from './services/api'
 
 function App() {
-  const [user, setUser] = useState<LoginResponse | null>(null)
+  const [user, setUser] = useState<LoginResponse | null>(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [currentView, setCurrentView] = useState<'employees' | 'cameraLogs'>('employees')
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   if (!user) {
     return <LoginPage onLoginSuccess={setUser} />

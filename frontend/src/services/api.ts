@@ -52,12 +52,37 @@ export async function createEmployee(
         body: JSON.stringify(data),
     })
     if (!res.ok) {
-        throw new Error('Failed to create employee')
+        const errorText = await res.text();
+        throw new Error(errorText || 'Failed to create employee');
     }
     return res.json()
 }
 
-// 6) Camera Logs
+// 6) Çalışan sil
+export async function deleteEmployee(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/Employees/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to delete employee');
+    }
+}
+
+// 7) Çalışan güncelle
+export async function updateEmployee(id: string, data: Partial<Employee>): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/Employees/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to update employee');
+    }
+}
+
+// 8) Camera Logs
 export interface CameraLog {
     id: string
     imageUrl: string
@@ -76,6 +101,8 @@ export async function getCameraLogs(): Promise<CameraLog[]> {
 export type Employee = {
     id: string;
     name: string;
+    email: string;
     department: string;
     createdAt: string;
+    updatedAt?: string;
 };

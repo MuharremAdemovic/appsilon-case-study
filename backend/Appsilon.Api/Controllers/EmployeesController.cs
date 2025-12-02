@@ -58,13 +58,27 @@ public class EmployeesController : ControllerBase
         if (!Request.Headers.TryGetValue("X-Department", out var userDept))
             return BadRequest("Department header missing");
 
+        // Duplicate check: Name + Department
+        var potentialDuplicates = await _context.Employees
+            .Where(e => e.Name == request.Name && e.Department == request.Department)
+            .ToListAsync();
+
+        foreach (var existing in potentialDuplicates)
+        {
+            if (BCrypt.Net.BCrypt.Verify(request.Password, existing.PasswordHash))
+            {
+                return Conflict("Bu isim, departman ve şifre ile kayıtlı bir çalışan zaten var.");
+            }
+        }
+
         var hashed = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
         var emp = new Employee
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            Department = userDept!,
+            Email = request.Email,
+            Department = request.Department,
             PasswordHash = hashed,
             CreatedAt = DateTime.UtcNow
         };
@@ -93,6 +107,7 @@ public class EmployeesController : ControllerBase
 
         existing.Name = updated.Name;
         existing.Department = updated.Department;
+        existing.UpdatedAt = DateTime.UtcNow;
         // CreatedAt'i değiştirmiyoruz
 
         await _context.SaveChangesAsync();
