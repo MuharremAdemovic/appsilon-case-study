@@ -1,6 +1,0 @@
-@Appsilon.Api_HostAddress = http://localhost:5185
-
-GET {{Appsilon.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
