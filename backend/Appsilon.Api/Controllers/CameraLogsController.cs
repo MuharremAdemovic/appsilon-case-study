@@ -70,29 +70,14 @@ public class CameraLogsController : ControllerBase
             await file.CopyToAsync(stream);
         }
 
-        // 2. Generate Mock ML Output
-        var mockOutput = new
-        {
-            detected_objects = new[]
-            {
-                new { label = "person", confidence = 0.98, bbox = new[] { 100, 200, 50, 80 } },
-                new { label = "backpack", confidence = 0.85, bbox = new[] { 120, 220, 30, 40 } }
-            },
-            processing_time_ms = 125
-        };
-        var modelOutputJson = JsonSerializer.Serialize(mockOutput);
-
-        // 3. Create CameraLog
-        // Assuming the server URL is accessible via relative path or we construct full URL
-        // For simplicity, we'll store the relative path or full URL if we knew the host.
-        // Let's store relative path "/uploads/..." and let frontend handle base URL or just use relative.
+        // 2. Create CameraLog (Pending Analysis)
         var imageUrl = $"/uploads/{uniqueFileName}";
 
         var log = new CameraLog
         {
             Id = Guid.NewGuid(),
             ImageUrl = imageUrl,
-            ModelOutputJson = modelOutputJson,
+            ModelOutputJson = "{}", // Empty initially
             CreatedAt = DateTime.UtcNow
         };
 
@@ -101,6 +86,89 @@ public class CameraLogsController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = log.Id }, log);
     }
+
+    [HttpPost("{id:guid}/analyze")]
+    public async Task<IActionResult> Analyze(Guid id)
+    {
+        var log = await _db.CameraLogs.FindAsync(id);
+        if (log == null) return NotFound();
+
+        // Construct file path from ImageUrl
+        // ImageUrl is like "/uploads/filename.jpg"
+        // We need physical path: "wwwroot/uploads/filename.jpg"
+        var relativePath = log.ImageUrl.TrimStart('/');
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            return BadRequest("Image file not found on server.");
+        }
+
+        string modelOutputJson;
+        try
+        {
+            var pythonScriptPath = "/app/ml/inference.py";
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "python3",
+                Arguments = $"{pythonScriptPath} \"{filePath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = System.Diagnostics.Process.Start(startInfo))
+            {
+                if (process == null) throw new Exception("Failed to start Python process.");
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    Console.WriteLine($"Python Error: {error}");
+                    modelOutputJson = JsonSerializer.Serialize(new { error = "ML Inference Failed", details = error });
+                }
+                else
+                {
+                    // Extract JSON from output (find first '{' and last '}')
+                    var firstBrace = output.IndexOf('{');
+                    var lastBrace = output.LastIndexOf('}');
+                    
+                    if (firstBrace >= 0 && lastBrace > firstBrace)
+                    {
+                        var rawJson = output.Substring(firstBrace, lastBrace - firstBrace + 1);
+                        try 
+                        {
+                            using var doc = JsonDocument.Parse(rawJson);
+                            modelOutputJson = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions { WriteIndented = true });
+                        }
+                        catch
+                        {
+                            modelOutputJson = rawJson;
+                        }
+                    }
+                    else
+                    {
+                        modelOutputJson = output;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ML Execution Error: {ex.Message}");
+            modelOutputJson = JsonSerializer.Serialize(new { error = "ML Execution Error", details = ex.Message });
+        }
+
+        log.ModelOutputJson = modelOutputJson;
+        await _db.SaveChangesAsync();
+
+        return Ok(log);
+    }
+
 
     [HttpPost]
     public async Task<ActionResult<CameraLog>> Create([FromBody] CreateCameraLogRequest request)

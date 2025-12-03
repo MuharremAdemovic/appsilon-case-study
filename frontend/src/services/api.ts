@@ -125,6 +125,17 @@ export async function uploadCameraLog(file: File): Promise<CameraLog> {
     return res.json();
 }
 
+export async function analyzeCameraLog(id: string): Promise<CameraLog> {
+    const res = await fetch(`${API_BASE_URL}/api/CameraLogs/${id}/analyze`, {
+        method: 'POST',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to analyze camera log');
+    }
+    return res.json();
+}
+
 export async function deleteCameraLog(id: string): Promise<void> {
     const res = await fetch(`${API_BASE_URL}/api/CameraLogs/${id}`, {
         method: 'DELETE',
