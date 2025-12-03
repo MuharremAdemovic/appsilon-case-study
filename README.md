@@ -25,6 +25,16 @@ docker-compose.yml       # Container Orchestration
 - **Machine Learning:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
 - **Infrastructure:** Docker, Docker Compose
 
+## Screenshots
+
+| Login Page | Employees Page |
+| :---: | :---: |
+| ![Login Page](docs/screenshots/login.jpg) | ![Employees Page](docs/screenshots/employees.jpg) |
+
+| Camera Logs (Upload) | Camera Logs (Analysis) |
+| :---: | :---: |
+| ![Upload](docs/screenshots/upload.jpg) | ![Analysis](docs/screenshots/analysis.jpg) |
+
 ## Assumptions
 
 1.  **ML Hybrid Approach:** Since a custom-trained model for "diamond" and "substrate" detection was not available, a hybrid approach was used. Real objects are detected using YOLOv8, while specific case study labels are injected programmatically for demonstration purposes.
@@ -80,6 +90,16 @@ docker-compose.yml       # Konteyner Orkestrasyonu
 - **Veritabanı:** PostgreSQL 16
 - **Makine Öğrenimi:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
 - **Altyapı:** Docker, Docker Compose
+
+## Ekran Görüntüleri
+
+| Giriş Sayfası | Çalışanlar Sayfası |
+| :---: | :---: |
+| ![Giriş Sayfası](docs/screenshots/login.jpg) | ![Çalışanlar Sayfası](docs/screenshots/employees.jpg) |
+
+| Kamera Kayıtları (Yükleme) | Kamera Kayıtları (Analiz) |
+| :---: | :---: |
+| ![Yükleme](docs/screenshots/upload.jpg) | ![Analiz](docs/screenshots/analysis.jpg) |
 
 ## Varsayımlar
 
