@@ -3,7 +3,7 @@
 ## 1. General System Flow
 The system operates as a cohesive pipeline connecting the user interface to the backend, database, and machine learning components:
 
-1.  **Frontend (React):** The user uploads an image via the web interface.
+1.  **Frontend (React):** The user logs in with **Name and Password** and uploads an image via the web interface.
 2.  **Backend (.NET API):** The API receives the image, saves it to the file system, and creates a "Pending" record in the **PostgreSQL** database.
 3.  **ML Inference (Python):** The backend triggers a Python subprocess. This script loads the **YOLOv8** model, processes the image, and generates a JSON output containing detected objects (both real and simulated).
 4.  **Database Update:** The backend captures the JSON output and updates the database record.
@@ -55,7 +55,7 @@ If more time were available, I would focus on:
 ## 1. Genel Sistem Akışı
 Sistem, kullanıcı arayüzünü backend, veritabanı ve makine öğrenimi bileşenlerine bağlayan bütünleşik bir boru hattı (pipeline) olarak çalışır:
 
-1.  **Frontend (React):** Kullanıcı web arayüzü üzerinden bir resim yükler.
+1.  **Frontend (React):** Kullanıcı **İsim ve Şifre** ile giriş yapar ve web arayüzü üzerinden bir resim yükler.
 2.  **Backend (.NET API):** API resmi alır, dosya sistemine kaydeder ve **PostgreSQL** veritabanında "Bekliyor" (Pending) durumunda bir kayıt oluşturur.
 3.  **ML Çıkarımı (Python):** Backend bir Python alt süreci başlatır. Bu script **YOLOv8** modelini yükler, resmi işler ve tespit edilen nesneleri (hem gerçek hem simüle edilmiş) içeren bir JSON çıktısı üretir.
 4.  **Veritabanı Güncellemesi:** Backend bu JSON çıktısını yakalar ve veritabanı kaydını günceller.

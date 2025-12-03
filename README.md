@@ -28,7 +28,7 @@ docker-compose.yml       # Container Orchestration
 ## Assumptions
 
 1.  **ML Hybrid Approach:** Since a custom-trained model for "diamond" and "substrate" detection was not available, a hybrid approach was used. Real objects are detected using YOLOv8, while specific case study labels are injected programmatically for demonstration purposes.
-2.  **Authentication:** For simplicity in this demo, full user authentication (JWT) is not implemented. The system assumes a single-user or internal environment. RLS policies are documented but not enforced via a login screen.
+2.  **Authentication:** A simple **Name & Password** login mechanism is implemented for demonstration. Full JWT authentication is not included, but RLS policies are documented.
 3.  **Deployment:** The application is designed to run in a containerized environment (Docker) and assumes ports 5173 (Frontend) and 5185 (Backend) are available.
 
 ## How to Run
@@ -84,7 +84,7 @@ docker-compose.yml       # Konteyner Orkestrasyonu
 ## Varsayımlar
 
 1.  **ML Hibrit Yaklaşım:** "Diamond" ve "substrate" tespiti için özel eğitilmiş bir model bulunmadığından hibrit bir yaklaşım benimsenmiştir. Gerçek nesneler YOLOv8 ile tespit edilirken, case study gereksinimleri için özel etiketler programatik olarak eklenmiştir.
-2.  **Kimlik Doğrulama:** Bu demo çalışmasında basitlik adına tam kapsamlı kullanıcı doğrulama (JWT) uygulanmamıştır. Sistem tek kullanıcılı veya iç ağ ortamı varsayımıyla çalışır. RLS politikaları dökümante edilmiş ancak giriş ekranı ile zorunlu kılınmamıştır.
+2.  **Kimlik Doğrulama:** Demo amacıyla basit bir **İsim & Şifre** giriş mekanizması uygulanmıştır. Tam kapsamlı JWT doğrulaması dahil edilmemiştir, ancak RLS politikaları dökümante edilmiştir.
 3.  **Dağıtım:** Uygulama konteynerize edilmiş bir ortamda (Docker) çalışacak şekilde tasarlanmıştır ve 5173 (Frontend) ile 5185 (Backend) portlarının müsait olduğunu varsayar.
 
 ## Nasıl Çalıştırılır
