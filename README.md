@@ -17,9 +17,19 @@ This project is a full-stack web application for managing employee records and a
 docker-compose.yml       # Container Orchestration
 ```
 
-## Prerequisites
+## Technologies Used
 
-- Docker & Docker Compose
+- **Frontend:** React, TypeScript, Vite, Vanilla CSS
+- **Backend:** .NET 8 Web API, C#, Entity Framework Core
+- **Database:** PostgreSQL 16
+- **Machine Learning:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
+- **Infrastructure:** Docker, Docker Compose
+
+## Assumptions
+
+1.  **ML Hybrid Approach:** Since a custom-trained model for "diamond" and "substrate" detection was not available, a hybrid approach was used. Real objects are detected using YOLOv8, while specific case study labels are injected programmatically for demonstration purposes.
+2.  **Authentication:** For simplicity in this demo, full user authentication (JWT) is not implemented. The system assumes a single-user or internal environment. RLS policies are documented but not enforced via a login screen.
+3.  **Deployment:** The application is designed to run in a containerized environment (Docker) and assumes ports 5173 (Frontend) and 5185 (Backend) are available.
 
 ## How to Run
 
@@ -38,15 +48,62 @@ docker-compose.yml       # Container Orchestration
     - **Frontend:** [http://localhost:5173](http://localhost:5173)
     - **Backend API:** [http://localhost:5185/swagger](http://localhost:5185/swagger)
 
-## Features
-
-- **Employee Management:** CRUD operations for employee records.
-- **Camera Log Analysis:**
-    - Upload images for analysis.
-    - Real-time progress feedback (Upload -> Analyze -> Success).
-    - **Hybrid ML Approach:** Uses YOLOv8 for real object detection + simulated "diamond/substrate" labels for case study requirements.
-    - View detailed JSON outputs in a modal.
-
 ## Documentation
 
 For detailed system architecture, data flow, and future plans, please refer to [docs/system_design.md](docs/system_design.md).
+
+---
+
+# Appsilon Case Study (Türkçe)
+
+Bu proje, çalışan kayıtlarını yönetmek ve Makine Öğrenimi (YOLOv8) kullanarak kamera kayıtlarını analiz etmek için geliştirilmiş tam kapsamlı (full-stack) bir web uygulamasıdır.
+
+## Proje Yapısı
+
+```
+/backend
+  └─ Appsilon.Api/       # .NET 8 Web API
+  └─ database_schema.sql # Veritabanı Şeması
+/frontend
+  └─ src/                # React + Vite Frontend
+/ml
+  └─ inference.py        # Python ML Scripti (YOLOv8)
+/docs
+  └─ system_design.md    # Sistem Mimarisi & Dökümantasyon
+docker-compose.yml       # Konteyner Orkestrasyonu
+```
+
+## Kullanılan Teknolojiler
+
+- **Frontend:** React, TypeScript, Vite, Vanilla CSS
+- **Backend:** .NET 8 Web API, C#, Entity Framework Core
+- **Veritabanı:** PostgreSQL 16
+- **Makine Öğrenimi:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
+- **Altyapı:** Docker, Docker Compose
+
+## Varsayımlar
+
+1.  **ML Hibrit Yaklaşım:** "Diamond" ve "substrate" tespiti için özel eğitilmiş bir model bulunmadığından hibrit bir yaklaşım benimsenmiştir. Gerçek nesneler YOLOv8 ile tespit edilirken, case study gereksinimleri için özel etiketler programatik olarak eklenmiştir.
+2.  **Kimlik Doğrulama:** Bu demo çalışmasında basitlik adına tam kapsamlı kullanıcı doğrulama (JWT) uygulanmamıştır. Sistem tek kullanıcılı veya iç ağ ortamı varsayımıyla çalışır. RLS politikaları dökümante edilmiş ancak giriş ekranı ile zorunlu kılınmamıştır.
+3.  **Dağıtım:** Uygulama konteynerize edilmiş bir ortamda (Docker) çalışacak şekilde tasarlanmıştır ve 5173 (Frontend) ile 5185 (Backend) portlarının müsait olduğunu varsayar.
+
+## Nasıl Çalıştırılır
+
+1.  **Depoyu klonlayın:**
+    ```bash
+    git clone <repository-url>
+    cd appsilon-case-study
+    ```
+
+2.  **Uygulamayı başlatın:**
+    ```bash
+    docker-compose up -d --build
+    ```
+
+3.  **Uygulamaya erişin:**
+    - **Frontend:** [http://localhost:5173](http://localhost:5173)
+    - **Backend API:** [http://localhost:5185/swagger](http://localhost:5185/swagger)
+
+## Dökümantasyon
+
+Detaylı sistem mimarisi, veri akışı ve gelecek planları için lütfen [docs/system_design.md](docs/system_design.md) dosyasına bakınız.

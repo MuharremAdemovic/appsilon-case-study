@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS "Employees" (
     "Name" TEXT NOT NULL,
     "Email" TEXT NOT NULL,
     "Department" TEXT NOT NULL,
+    "PasswordHash" TEXT, -- Added for consistency with C# model
+    "UpdatedAt" TIMESTAMP WITH TIME ZONE,
     "CreatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
