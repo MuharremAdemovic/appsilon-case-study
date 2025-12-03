@@ -2,7 +2,7 @@ const API_BASE_URL = "http://localhost:5185";
 
 // 3) Login ol
 export interface LoginRequest {
-    email: string
+    name: string
     password: string // Backend'de password kontrolü basitçe string karşılaştırma ise
 }
 

@@ -6,19 +6,19 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
-    const [email, setEmail] = useState('')
+    const [name, setName] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault()
-        if (!email || !password) return
+        if (!name || !password) return
 
         try {
             setIsLoading(true)
             setError(null)
-            const user = await login({ email, password })
+            const user = await login({ name, password })
             onLoginSuccess(user)
         } catch (err: any) {
             setError('Login failed. Please check your credentials.')
@@ -76,12 +76,12 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                             color: '#4a5568',
                             marginLeft: '0.25rem'
                         }}>
-                            Email Address
+                            Name
                         </label>
                         <input
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            type="text"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
                             style={{
                                 width: '100%',
                                 padding: '0.875rem 1rem',
@@ -101,7 +101,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                                 e.target.style.borderColor = '#e2e8f0';
                                 e.target.style.backgroundColor = '#f7fafc';
                             }}
-                            placeholder="name@company.com"
+                            placeholder="John Doe"
                             required
                         />
                     </div>

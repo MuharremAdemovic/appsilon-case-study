@@ -192,7 +192,7 @@ export default function EmployeesPage({ currentUser }: EmployeesPageProps) {
                                 </select>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                                <button type="button" onClick={closeModal} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e0', background: 'white', cursor: 'pointer' }}>Cancel</button>
+                                <button type="button" onClick={closeModal} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #feb2b2', background: '#fff5f5', color: '#c53030', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
                                 <button type="submit" disabled={submitting} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: '#667eea', color: 'white', cursor: 'pointer' }}>
                                     {submitting ? 'Saving...' : 'Save Changes'}
                                 </button>

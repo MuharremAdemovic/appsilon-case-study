@@ -22,14 +22,14 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var emp = await _context.Employees
-            .FirstOrDefaultAsync(e => e.Email == request.Email);
+            .FirstOrDefaultAsync(e => e.Name == request.Name);
 
         if (emp == null)
-            return Unauthorized("Invalid email or password");
+            return Unauthorized("Invalid name or password");
 
         bool valid = BCrypt.Net.BCrypt.Verify(request.Password, emp.PasswordHash);
         if (!valid)
-            return Unauthorized("Invalid email or password");
+            return Unauthorized("Invalid name or password");
 
         return Ok(new
         {
@@ -79,8 +79,4 @@ public class AuthController : ControllerBase
     }
 }
 
-public class LoginRequest
-{
-    public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
-}
+
