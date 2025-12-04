@@ -19,8 +19,8 @@ docker-compose.yml       # Container Orchestration
 
 ## Technologies Used
 
-- **Frontend:** React, TypeScript, Vite, Vanilla CSS
-- **Backend:** .NET 8 Web API, C#, Entity Framework Core
+- **Frontend:** React (Vite), TypeScript, Vanilla CSS
+- **Backend:** .NET 10 Web API, Entity Framework Core
 - **Database:** PostgreSQL 16
 - **Machine Learning:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
 - **Infrastructure:** Docker, Docker Compose
@@ -38,8 +38,8 @@ docker-compose.yml       # Container Orchestration
 ## Assumptions
 
 1.  **ML Hybrid Approach:** Since a custom-trained model for "diamond" and "substrate" detection was not available, a hybrid approach was used. Real objects are detected using YOLOv8, while specific case study labels are injected programmatically for demonstration purposes.
-2.  **Authentication:** A simple **Name & Password** login mechanism is implemented for demonstration. Full JWT authentication is not included, but RLS policies are documented.
-3.  **Deployment:** The application is designed to run in a containerized environment (Docker) and assumes ports 5173 (Frontend) and 5185 (Backend) are available.
+2.  **Security:** Basic JWT-ready structure is in place (BCrypt for passwords), but full JWT token generation was skipped for simplicity in this demo, focusing on the core logic.
+3.  **RLS (Row Level Security):** Implemented logically in the application layer (filtering by Department) to demonstrate the concept without complex database-level user mapping in this Dockerized environment.
 
 ## How to Run
 

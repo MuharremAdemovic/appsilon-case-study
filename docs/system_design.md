@@ -11,7 +11,7 @@ The system operates as a cohesive pipeline connecting the user interface to the 
 
 ## 2. Why these technologies were chosen?
 *   **React + Vite:** Chosen for its component-based architecture, fast development cycle, and excellent performance. Vite ensures rapid build times.
-*   **.NET 8 Web API:** Selected for its robustness, type safety (C#), and high performance. It provides a solid foundation for enterprise-grade applications.
+*   **.NET 10 Web API:** Selected for its robustness, type safety (C#), and high performance. It provides a solid foundation for enterprise-grade applications.
 *   **Python + YOLOv8:** Python is the industry standard for ML. YOLOv8 was chosen for its state-of-the-art object detection speed and accuracy, making it ideal for real-time analysis.
 *   **PostgreSQL:** A reliable, open-source relational database that handles structured data (employees) and JSON data (ML outputs) efficiently.
 *   **Docker:** Ensures consistent environments across development and deployment, solving "it works on my machine" issues.
@@ -63,7 +63,7 @@ Sistem, kullanıcı arayüzünü backend, veritabanı ve makine öğrenimi bile�
 
 ## 2. Neden bu teknolojileri seçtiniz?
 *   **React + Vite:** Bileşen tabanlı mimarisi, hızlı geliştirme döngüsü ve mükemmel performansı için seçildi. Vite, çok hızlı derleme süreleri sunar.
-*   **.NET 8 Web API:** Sağlamlığı, tip güvenliği (C#) ve yüksek performansı nedeniyle tercih edildi. Kurumsal seviyede uygulamalar için güçlü bir temel sağlar.
+*   **.NET 10 Web API:** Sağlamlığı, tip güvenliği (C#) ve yüksek performansı nedeniyle tercih edildi. Kurumsal seviyede uygulamalar için güçlü bir temel sağlar.
 *   **Python + YOLOv8:** Python, ML dünyasının endüstri standardıdır. YOLOv8, gerçek zamanlı analiz için ideal olan hızı ve doğruluğu nedeniyle seçildi.
 *   **PostgreSQL:** Hem yapısal verileri (çalışanlar) hem de JSON verilerini (ML çıktıları) verimli bir şekilde işleyebilen güvenilir, açık kaynaklı bir veritabanıdır.
 *   **Docker:** "Benim bilgisayarımda çalışıyordu" sorununu ortadan kaldırarak geliştirme ve dağıtım ortamlarının tutarlı olmasını sağlar.
