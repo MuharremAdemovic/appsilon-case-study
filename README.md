@@ -6,7 +6,7 @@ This project is a full-stack web application for managing employee records and a
 
 ```
 /backend
-  └─ Appsilon.Api/       # .NET 8 Web API
+  └─ Appsilon.Api/       # .NET 10 Web API
   └─ database_schema.sql # Database Schema
 /frontend
   └─ src/                # React + Vite Frontend
@@ -72,7 +72,7 @@ Bu proje, çalışan kayıtlarını yönetmek ve Makine Öğrenimi (YOLOv8) kull
 
 ```
 /backend
-  └─ Appsilon.Api/       # .NET 8 Web API
+  └─ Appsilon.Api/       # .NET 10 Web API
   └─ database_schema.sql # Veritabanı Şeması
 /frontend
   └─ src/                # React + Vite Frontend
@@ -86,7 +86,7 @@ docker-compose.yml       # Konteyner Orkestrasyonu
 ## Kullanılan Teknolojiler
 
 - **Frontend:** React, TypeScript, Vite, Vanilla CSS
-- **Backend:** .NET 8 Web API, C#, Entity Framework Core
+- **Backend:** .NET 10 Web API, C#, Entity Framework Core
 - **Veritabanı:** PostgreSQL 16
 - **Makine Öğrenimi:** Python 3.12, YOLOv8 (Ultralytics), OpenCV
 - **Altyapı:** Docker, Docker Compose
